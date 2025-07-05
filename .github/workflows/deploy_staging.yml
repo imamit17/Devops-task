@@ -3,7 +3,6 @@ name: App Deploy - Staging
 on:
   push:
     paths:
-      - 'App/**'
       - 'App/helm/staging-values.yaml'
 
 jobs:
