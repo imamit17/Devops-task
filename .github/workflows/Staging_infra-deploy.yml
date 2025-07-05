@@ -3,7 +3,7 @@ name: Infra Deploy - Staging
 on:
   push:
     paths:
-      - 'tfvars/staging/**'
+      - 'Infra/tfvars/staging/**'
 permissions:
   id-token: write
   contents: read
