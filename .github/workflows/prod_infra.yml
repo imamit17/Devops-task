@@ -3,7 +3,7 @@ name: Infra Deploy - Prod
 on:
   push:
     paths:
-      - 'tfvars/prod/**'
+      - 'Infra/tfvars/prod/**'
 
 permissions:
   id-token: write
