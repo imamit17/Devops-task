@@ -31,8 +31,8 @@ jobs:
 
       - name: Terraform Plan
         working-directory: Infra/infrastructure
-        run: terraform plan -var-file="../tfvars/staging/staging.tfvars"
+        run: terraform plan -var-file="../tfvars/staging/staging.tfvars" 
 
       - name: Terraform Apply (manual approval required)
         working-directory: Infra/infrastructure
-        run: terraform apply -var-file="../tfvars/staging/staging.tfvars"
+        run: terraform apply -var-file="../tfvars/staging/staging.tfvars" -auto-approve
