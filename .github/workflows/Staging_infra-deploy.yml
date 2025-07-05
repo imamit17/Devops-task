@@ -3,8 +3,10 @@ name: Infra Deploy - Staging
 on:
   push:
     paths:
-      - 'Infra/**'
       - 'tfvars/staging/**'
+permissions:
+  id-token: write
+  contents: read
 
 jobs:
   terraform-staging:
