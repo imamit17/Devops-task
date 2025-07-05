@@ -3,8 +3,11 @@ name: Infra Deploy - Prod
 on:
   push:
     paths:
-      - 'Infra/**'
       - 'tfvars/prod/**'
+
+permissions:
+  id-token: write
+  contents: read
 
 jobs:
   terraform-prod:
