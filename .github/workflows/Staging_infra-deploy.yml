@@ -27,7 +27,7 @@ jobs:
 
       - name: Terraform Init
         working-directory: Infra/infrastructure
-        run: terraform init
+        run: terraform init -backend-config="resource_group_name=final_test" -backend-config="storage_account_name=aztfdevops"  -backend-config="container_name=tfstate-staging"  -backend-config="key=stageterraform.tfstate"
 
       - name: Terraform Plan
         working-directory: Infra/infrastructure
