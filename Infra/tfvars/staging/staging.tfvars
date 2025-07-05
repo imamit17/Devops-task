@@ -8,4 +8,3 @@ aks_cluster_name = "aks-staging"
 
 # ACR
 acr_name = "acrstaging001"
-
