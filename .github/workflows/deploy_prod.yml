@@ -1,0 +1,56 @@
+name: App Deploy - Prod
+
+on:
+  push:
+    paths:
+      - 'App/**'
+      - 'App/helm/prod-values.yaml'
+
+jobs:
+  deploy-prod-app:
+    name: Deploy Prod App
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Azure Login
+        uses: azure/login@v1
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+          client-secret: ${{ secrets.AZURE_CLIENT_SECRET }}
+
+      - name: Set AKS Context for Prod
+        run: |
+          az aks get-credentials \
+            --resource-group ${{ secrets.AKS_RG_NAME_PROD }} \
+            --name ${{ secrets.AKS_CLUSTER_NAME_PROD }} \
+            --overwrite-existing
+
+      - name: Set up JDK
+        uses: actions/setup-java@v3
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+
+      - name: Build Maven App
+        working-directory: App
+        run: mvn clean package
+
+      - name: Docker Login to ACR
+        run: az acr login --name ${{ secrets.ACR_NAME }}
+
+      - name: Build and Push Docker Image
+        working-directory: App
+        run: |
+          docker build -t ${{ secrets.ACR_NAME }}.azurecr.io/frontend-app:prod .
+          docker push ${{ secrets.ACR_NAME }}.azurecr.io/frontend-app:prod
+
+      - name: Deploy with Helm to Prod
+        run: |
+          helm upgrade --install frontend-prod ./App/charts/frontend \
+            -f App/helm/prod-values.yaml \
+            --namespace prod --create-namespace

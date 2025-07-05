@@ -1,0 +1,28 @@
+replicaCount: 2
+
+image:
+  repository: <your-acr>.azurecr.io/frontend-app
+  tag: "latest"
+  pullPolicy: Always
+
+service:
+  type: ClusterIP 
+  port: 80
+  targetPort: 8080
+
+resources:
+  limits:
+    cpu: 250m
+    memory: 512Mi
+  requests:
+    cpu: 100m
+    memory: 256Mi
+
+env:
+  - name: SPRING_PROFILES_ACTIVE
+    value: default
+
+secrets:
+  enabled: true
+  mountPath: /mnt/secrets
+  secretProviderClass: app-secrets

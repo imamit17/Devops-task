@@ -1,0 +1,56 @@
+name: App Deploy - Staging
+
+on:
+  push:
+    paths:
+      - 'App/**'
+      - 'App/helm/staging-values.yaml'
+
+jobs:
+  deploy-staging-app:
+    name: Deploy Staging App
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Azure Login
+        uses: azure/login@v1
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+          client-secret: ${{ secrets.AZURE_CLIENT_SECRET }}
+
+      - name: Set AKS Context for Staging
+        run: |
+          az aks get-credentials \
+            --resource-group ${{ secrets.AKS_RG_NAME_STAGING }} \
+            --name ${{ secrets.AKS_CLUSTER_NAME_STAGING }} \
+            --overwrite-existing
+
+      - name: Set up JDK
+        uses: actions/setup-java@v3
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+
+      - name: Build Maven App
+        working-directory: App
+        run: mvn clean package
+
+      - name: Docker Login to ACR
+        run: az acr login --name ${{ secrets.ACR_NAME }}
+
+      - name: Build and Push Docker Image
+        working-directory: App
+        run: |
+          docker build -t ${{ secrets.ACR_NAME }}.azurecr.io/frontend-app:staging .
+          docker push ${{ secrets.ACR_NAME }}.azurecr.io/frontend-app:staging
+
+      - name: Deploy with Helm to Staging
+        run: |
+          helm upgrade --install frontend-staging ./App/charts/frontend \
+            -f App/helm/staging-values.yaml \
+            --namespace staging --create-namespace
